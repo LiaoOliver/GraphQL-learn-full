@@ -2,6 +2,8 @@ const { ApolloServer } = require('apollo-server');
 const { GraphQLScalarType } = require('graphql');
 
 const typeDefs = `
+    scalar DateTime
+
     enum PhotoCategory{
         SELFIE
         PORTRAIT
@@ -18,14 +20,12 @@ const typeDefs = `
 
     type Query{
         totalPhotos:Int!
-        allPhotos:[Photo!]!
+        allPhotos(after:DateTime):[Photo!]!
     }
 
     type Mutation{
         postPhoto(input:PostPhotoInput!): Photo!
     }
-
-    scalar DateTime
 
     type Photo{
         id: ID!
@@ -68,42 +68,56 @@ var photos = [
         name: "Dropping",
         description: " the heart",
         category: "ACTION",
-        githubUser: "gPlake"
+        githubUser: "gPlake",
+        created:"3-28-1977"
     },
     {
         id: 2,
         name: "Enjoying",
         description: " the heart",
         category: "SELFIE",
-        githubUser: "sSchmidt"
+        githubUser: "sSchmidt",
+        created:"4-28-1977"
     },
     {
         id: 3,
         name: "Gunbarrel 25",
         description: " the heart",
         category: "LANDSCAPE",
-        githubUser: "mHattrup"
+        githubUser: "mHattrup",
+        created:"2018-04-15T00:00:00.0Z"
     },
     {
         id: 4,
         name: "Gunbarrel 765",
         description: " the heart",
         category: "LANDSCAPE",
-        githubUser: "mHattrup"
+        githubUser: "mHattrup",
+        created:"4/18/2018"
     }
 ]
 
 const resolvers = {
     Query:{
         totalPhotos: () => photos.length,
-        allPhotos:() => photos,
+        allPhotos: (parent, args) => {
+            let result = [];
+
+            photos.find(photo => {
+                if (new Date(photo.created).getTime() === new Date(args.after).getTime()){
+                    result.push(photo)
+                }
+            });
+            
+            return args.value === undefined ? photos : result;
+        }
     },
     Mutation:{
         postPhoto(parent, args){
-            
             let photo = {
                 id:id,
-                ...args.input
+                ...args.input,
+                created: new Date()
             }
             photos.push(photo)
             return photo
@@ -126,12 +140,16 @@ const resolvers = {
                             .map(tag => tag.photoID)
                             .map(photoID => photos.find(p => p.id === photoID))
     },
+    // 自訂純量
     DateTime: new GraphQLScalarType({
         name:'DateTime',
         description: 'A valid date time value',
-        parseValue: value => new Date(value),
-        serialize: value => new Date(value).toISOString(),
-        parseLiteral: ast => ast.value
+        // 
+        parseValue: value => { console.log("parseValue",value) ; return new Date(value); },
+        // 序列化
+        serialize: value => { console.log("serialize",value) ; return new Date(value).toISOString(); },
+        // 
+        parseLiteral: ast => { console.log("parseLiteral", ast) ; return ast.value; },
     })
 }
 
