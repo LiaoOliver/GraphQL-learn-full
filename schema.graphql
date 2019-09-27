@@ -1,0 +1,14 @@
+
+    type Query{
+        totalPhotos:Int!
+        listPhotos:[Lists]!
+    }
+
+    type Mutation{
+        postPhoto(name: String! description:String!): Boolean!
+    }
+
+    type Lists{
+        name: String!
+        description: String!
+    }
