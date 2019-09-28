@@ -3,15 +3,16 @@ const expressPlayground = require('graphql-playground-middleware-express').defau
 const express = require('express');
 const { readFileSync } = require('fs');
 const MongoClient = require('mongodb').MongoClient;
+require('dotenv').config();
 
 const typeDefs = readFileSync('./typeDefs.graphql', 'UTF-8');
 const resolvers = require('./resolver');
-const dbURL = require('./config/keys').mongoURL;
+
 
 const app = express();
 
 async function start(){
-    const client = await MongoClient.connect(dbURL, { useNewUrlParser: true, useUnifiedTopology: true })
+    const client = await MongoClient.connect(process.env.mongoURL, { useNewUrlParser: true, useUnifiedTopology: true })
     const db = client.db();
     const context = { db };
     const server = new ApolloServer({
