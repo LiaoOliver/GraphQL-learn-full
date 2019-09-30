@@ -1,6 +1,5 @@
 const { GraphQLScalarType } = require('graphql');
 
-
 var id = new Date();
 var users = [
     { "githubLogin": "mHattrup", "name": "Mike Hattrup" },
@@ -52,18 +51,10 @@ var photos = [
 
 const resolvers = {
     Query: {
-        totalPhotos: () => photos.length,
-        allPhotos: (parent, args) => {
-            let result = [];
-
-            photos.find(photo => {
-                if (new Date(photo.created).getTime() === new Date(args.after).getTime()) {
-                    result.push(photo)
-                }
-            });
-
-            return args.value === undefined ? photos : result;
-        }
+        totalPhotos: (parent, args, { db }) => db.collection('photos').estimateDocumentCount(),
+        allPhotos: (parent, args, { db }) => db.collection('photos').find().toArray(),
+        totalUser: (parent, args, { db }) => db.collection('photos').estimateDocumentCount(),
+        allUser: (parent, args, {db}) => db.collection('users').find().toArray(),
     },
     Mutation: {
         postPhoto(parent, args) {
@@ -74,7 +65,7 @@ const resolvers = {
             }
             photos.push(photo)
             return photo
-        }
+        },
     },
     Photo: {
         url: parent => 'www.youtube.com',
@@ -105,3 +96,4 @@ const resolvers = {
         parseLiteral: ast => { console.log("parseLiteral", ast); return ast.value; },
     })
 }
+

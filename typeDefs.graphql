@@ -16,12 +16,18 @@
     }
 
     type Query{
+        me:User,
         totalPhotos:Int!
         allPhotos(after:DateTime):[Photo!]!
+        allUsers:[User!]!
+        totalUsers:Int!
     }
 
     type Mutation{
         postPhoto(input:PostPhotoInput!): Photo!
+        githubAuth(code: String!):AuthPayload!
+        addFakeUsers(count: Int=1):[User!]!
+        fakeUserAuth(githubLogin: ID!): AuthPayload!
     }
 
     type Photo{
@@ -39,6 +45,12 @@
         githubLogin: ID!
         name: String
         avatar: String
+        githubToken: String
         postedPhotos: [Photo!]!
         inPhotos:[Photo!]!
+    }
+
+    type AuthPayload{
+        token:String!
+        user:User!
     }
