@@ -38,7 +38,8 @@ const githubAuth = async (parent, { code }, { db }) => {
     return { user, token: access_token }
 };
 
-const postPhoto = async (parent, args, { db, currentUser }) =>{
+const postPhoto = async (parent, args, { db, currentUser, pubsub }) =>{
+
     // 確定是否用戶已經登入 如果沒有登入 currentUser 為空
     if(!currentUser){
         throw new Error('only an auth user can post a photo')
@@ -54,6 +55,11 @@ const postPhoto = async (parent, args, { db, currentUser }) =>{
     // 在 DB 中 存入新資料
     const { insertedIds } = await db.collection('photos').insert(newPhoto);
     newPhoto.id = insertedIds[0];
+
+    console.log('prev', pubsub)
+    // 訂閱
+    pubsub.publish('photo-added', { newPhoto })
+    console.log('after', pubsub)
 
     return newPhoto
 } 

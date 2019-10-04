@@ -30,6 +30,10 @@
         fakeUserAuth(githubLogin: ID!): AuthPayload!
     }
 
+    type Subscription{
+        newPhoto: Photo!
+    }
+
     type Photo{
         id: ID!
         url: String!
